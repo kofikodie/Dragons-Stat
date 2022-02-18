@@ -29,5 +29,9 @@
         "editor.codeActionsOnSave": {
             "source.formatAll.terraform": true
         },
-    }
+    },
+    "github-actions.workflows.pinned.workflows": [
+        ".github/workflows/main.yml", ".github/workflows/create.yml"],
+    "github-actions.workflows.pinned.refresh.enabled": true,
+    "github-actions.workflows.pinned.refresh.interval": 65,
 }
