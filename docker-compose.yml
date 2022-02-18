@@ -1,0 +1,12 @@
+version: '3.7'
+services:
+  app:
+    build:
+      context: .
+      dockerfile: .docker/node/Dockerfile
+    command: ["npm", "run", "start"]
+    volumes:
+      - ./:/home/node/app
+      - ~/.aws/:/root/.aws:ro
+    ports:
+      - "8080:8080"
