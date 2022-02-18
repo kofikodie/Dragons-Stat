@@ -5,7 +5,7 @@ const s3 = new AWS.S3({
     region: 'eu-central-1',
 })
 
-async function readDragons() {
+export async function readDragons(): Promise<void> {
     const s3Bucket = await s3.listBuckets().promise()
     const s3files = await s3
         .listObjects({ Bucket: 'dragons-stat-bucket' })
