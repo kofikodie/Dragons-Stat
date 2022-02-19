@@ -25,7 +25,11 @@ resource "aws_api_gateway_integration" "dragon_api_integration" {
   rest_api_id = aws_api_gateway_rest_api.dragon_api.id
   type        = "MOCK"
   request_templates = {
-    "application/json" = "{\"statusCode\": 200}"
+    "application/json" = jsonencode(
+      {
+        "statusCode" = 200
+      }
+    )
   }
 }
 
@@ -43,7 +47,20 @@ resource "aws_api_gateway_integration_response" "dragon_integration_response" {
   status_code = aws_api_gateway_method_response.dragon_response_200.status_code
 
   response_templates = {
-    "application/json" = ""
+    "application/json" = jsonencode(
+      {
+        "application/json" = <<REQUEST_TEMPLATE
+        {
+          "statusCode" = 200
+          "body" = <<BODY
+            {
+              "message": "Hello, AWS API Gateway!"
+            }
+          BODY
+        }
+        REQUEST_TEMPLATE
+      }
+    )
   }
 }
 
