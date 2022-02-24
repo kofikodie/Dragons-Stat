@@ -11,16 +11,15 @@ resource "aws_api_gateway_resource" "dragons_api_resource" {
   rest_api_id = aws_api_gateway_rest_api.dragon_api.id
 }
 
-resource "aws_api_gateway_method" "dragon_api_method" {
+resource "aws_api_gateway_method" "dragon_api_method_get" {
   authorization = "NONE"
   http_method   = "GET"
   resource_id   = aws_api_gateway_resource.dragons_api_resource.id
   rest_api_id   = aws_api_gateway_rest_api.dragon_api.id
 }
 
-
 resource "aws_api_gateway_integration" "dragon_api_integration" {
-  http_method = aws_api_gateway_method.dragon_api_method.http_method
+  http_method = aws_api_gateway_method.dragon_api_method_get.http_method
   resource_id = aws_api_gateway_resource.dragons_api_resource.id
   rest_api_id = aws_api_gateway_rest_api.dragon_api.id
   type        = "MOCK"
@@ -33,18 +32,11 @@ resource "aws_api_gateway_integration" "dragon_api_integration" {
   }
 }
 
-resource "aws_api_gateway_method_response" "dragon_response_200" {
+resource "aws_api_gateway_integration_response" "dragon_integration_response_get" {
   rest_api_id = aws_api_gateway_rest_api.dragon_api.id
   resource_id = aws_api_gateway_resource.dragons_api_resource.id
-  http_method = aws_api_gateway_method.dragon_api_method.http_method
-  status_code = "200"
-}
-
-resource "aws_api_gateway_integration_response" "dragon_integration_response" {
-  rest_api_id = aws_api_gateway_rest_api.dragon_api.id
-  resource_id = aws_api_gateway_resource.dragons_api_resource.id
-  http_method = aws_api_gateway_method.dragon_api_method.http_method
-  status_code = aws_api_gateway_method_response.dragon_response_200.status_code
+  http_method = aws_api_gateway_method.dragon_api_method_get.http_method
+  status_code = aws_api_gateway_method_response.dragon_response_get_200.status_code
 
   response_templates = {
     "application/json" = <<REQUEST_TEMPLATE
@@ -58,31 +50,11 @@ resource "aws_api_gateway_integration_response" "dragon_integration_response" {
         "location_neighborhood_str":"e clark ave",
         "location_state_str":"nevada"
       }
-      #elseif($input.params("family") == "red") 
-      {
-        "description_str":"Briarthorn is the fire tribe's main general. He commands the red dragons.",
-        "dragon_name_str":"Briarthorn",
-        "family_str":"red",
-        "location_city_str":"las vegas",
-        "location_country_str":"usa",
-        "location_neighborhood_str":"e clark ave",
-        "location_state_str":"nevada"
-      }
       #elseif($input.params("family") == "blue") 
       {
         "description_str":"Shadown is the water tribe's main general. He commands the blue dragons.",
         "dragon_name_str":"Shadown",
         "family_str":"blue",
-        "location_city_str":"las vegas",
-        "location_country_str":"usa",
-        "location_neighborhood_str":"e clark ave",
-        "location_state_str":"nevada"
-      }
-      #elseif($input.params("family") == "white") 
-      {
-        "description_str":"Storm is the air tribe's main general. He commands the white dragons.",
-        "dragon_name_str":"Storm",
-        "family_str":"white",
         "location_city_str":"las vegas",
         "location_country_str":"usa",
         "location_neighborhood_str":"e clark ave",
@@ -119,6 +91,57 @@ resource "aws_api_gateway_integration_response" "dragon_integration_response" {
       }
       #end
 REQUEST_TEMPLATE
+  }
+}
+
+resource "aws_api_gateway_method_response" "dragon_response_get_200" {
+  rest_api_id = aws_api_gateway_rest_api.dragon_api.id
+  resource_id = aws_api_gateway_resource.dragons_api_resource.id
+  http_method = aws_api_gateway_method.dragon_api_method_get.http_method
+  status_code = "200"
+}
+
+resource "aws_api_gateway_method" "dragon_api_method_post" {
+  authorization = "NONE"
+  http_method   = "POST"
+  resource_id   = aws_api_gateway_resource.dragons_api_resource.id
+  rest_api_id   = aws_api_gateway_rest_api.dragon_api.id
+}
+
+
+resource "aws_api_gateway_integration" "dragon_api_integration_post" {
+  http_method             = aws_api_gateway_method.dragon_api_method_post.http_method
+  resource_id             = aws_api_gateway_resource.dragons_api_resource.id
+  rest_api_id             = aws_api_gateway_rest_api.dragon_api.id
+  type                    = "MOCK"
+  request_templates = {
+    "application/json" = jsonencode(
+      {
+        "statusCode" = 200
+      }
+    )
+  }
+}
+
+resource "aws_api_gateway_method_response" "dragon_response_post_200" {
+  rest_api_id = aws_api_gateway_rest_api.dragon_api.id
+  resource_id = aws_api_gateway_resource.dragons_api_resource.id
+  http_method = aws_api_gateway_method.dragon_api_method_post.http_method
+  status_code = "200"
+}
+
+resource "aws_api_gateway_integration_response" "dragon_integration_response_post" {
+  rest_api_id = aws_api_gateway_rest_api.dragon_api.id
+  resource_id = aws_api_gateway_resource.dragons_api_resource.id
+  http_method = aws_api_gateway_method.dragon_api_method_post.http_method
+  status_code = aws_api_gateway_method_response.dragon_response_post_200.status_code
+
+  response_templates = {
+    "application/json" = <<REQUEST_TEMPLATE
+      {
+        "statusCode" = 200
+      }
+    REQUEST_TEMPLATE
   }
 }
 
