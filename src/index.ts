@@ -7,7 +7,7 @@ const s3 = new AWS.S3({
 })
 
 exports.handler = async (event: APIGatewayEvent): Promise<ProxyResult> => {
-    return await readDragons(event)
+    return readDragons(event)
 }
 
 export async function readDragons(event: APIGatewayEvent): Promise<any> {
@@ -43,11 +43,11 @@ export async function readDragons(event: APIGatewayEvent): Promise<any> {
             statusCode: 500,
             body: 'Error while reading from S3',
         }
-    } else {
-        return {
-            statusCode: 500,
-            body: 'No bucket or file found',
-        }
+    }
+
+    return {
+        statusCode: 500,
+        body: 'No bucket or file found',
     }
 }
 
@@ -63,10 +63,7 @@ async function readDragonsFromS3(
         event.queryStringParameters.family &&
         event.queryStringParameters.family !== ''
     ) {
-        expression =
-            "select * from S3Object[*][*] s where s.family_str =  '" +
-            event['queryStringParameters']['family'] +
-            "'"
+        expression = `select * from S3Object[*][*] s where s.family_str = '${event.queryStringParameters.family}'`
     }
 
     const result = await s3
