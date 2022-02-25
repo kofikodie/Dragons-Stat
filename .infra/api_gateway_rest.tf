@@ -156,41 +156,41 @@ resource "aws_api_gateway_model" "dragon_model" {
   content_type = "application/json"
 
   schema = <<EOF
-{
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "Dragon",
-  "type": "object",
-  "properties": {
-    "dragonName": {
-      "type": "string"
-    },
-    "description": {
-      "type": "string"
-    },
-    "family": {
-      "type": "string"
-    },
-    "city": {
-      "type": "string"
-    },
-    "country": {
-      "type": "string"
-    },
-    "state": {
-      "type": "string"
-    },
-    "neighborhood": {
-      "type": "string"
-    },
-    "reportingPhoneNumber": {
-      "type": "string"
-    },
-    "confirmationRequired": {
-      "type": "boolean"
+  {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Dragon",
+    "type": "object",
+    "properties": {
+      "dragonName": {
+        "type": "string"
+      },
+      "description": {
+        "type": "string"
+      },
+      "family": {
+        "type": "string"
+      },
+      "city": {
+        "type": "string"
+      },
+      "country": {
+        "type": "string"
+      },
+      "state": {
+        "type": "string"
+      },
+      "neighborhood": {
+        "type": "string"
+      },
+      "reportingPhoneNumber": {
+        "type": "string"
+      },
+      "confirmationRequired": {
+        "type": "boolean"
+      }
     }
   }
-}
-EOF
+  EOF
 }
 
 resource "aws_api_gateway_request_validator" "dragon_post_request_validator" {
