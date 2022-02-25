@@ -1,0 +1,11 @@
+app: dragon-ws
+service: dragon-ws
+provider:
+  name: aws
+  runtime: nodejs14.x
+  stage: dev
+  region: eu-central-1
+
+functions:
+  dragon_ws:
+    handler: dist/src/index.handler
