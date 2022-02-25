@@ -102,18 +102,22 @@ resource "aws_api_gateway_method_response" "dragon_response_get_200" {
 }
 
 resource "aws_api_gateway_method" "dragon_api_method_post" {
-  authorization = "NONE"
-  http_method   = "POST"
-  resource_id   = aws_api_gateway_resource.dragons_api_resource.id
-  rest_api_id   = aws_api_gateway_rest_api.dragon_api.id
+  authorization        = "NONE"
+  http_method          = "POST"
+  resource_id          = aws_api_gateway_resource.dragons_api_resource.id
+  rest_api_id          = aws_api_gateway_rest_api.dragon_api.id
+  request_validator_id = aws_api_gateway_request_validator.dragon_post_request_validator.id
+  request_models = {
+    "application/json" = "${aws_api_gateway_model.dragon_model.name}"
+  }
 }
 
 
 resource "aws_api_gateway_integration" "dragon_api_integration_post" {
-  http_method             = aws_api_gateway_method.dragon_api_method_post.http_method
-  resource_id             = aws_api_gateway_resource.dragons_api_resource.id
-  rest_api_id             = aws_api_gateway_rest_api.dragon_api.id
-  type                    = "MOCK"
+  http_method = aws_api_gateway_method.dragon_api_method_post.http_method
+  resource_id = aws_api_gateway_resource.dragons_api_resource.id
+  rest_api_id = aws_api_gateway_rest_api.dragon_api.id
+  type        = "MOCK"
   request_templates = {
     "application/json" = jsonencode(
       {
@@ -147,13 +151,60 @@ resource "aws_api_gateway_integration_response" "dragon_integration_response_pos
 
 resource "aws_api_gateway_model" "dragon_model" {
   rest_api_id  = aws_api_gateway_rest_api.dragon_api.id
-  name         = "user"
+  name         = "dragon"
   description  = "a JSON schema"
   content_type = "application/json"
 
   schema = <<EOF
 {
-  "type": "object"
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Dragon",
+  "type": "object",
+  "properties": {
+    "dragonName": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "family": {
+      "type": "string"
+    },
+    "city": {
+      "type": "string"
+    },
+    "country": {
+      "type": "string"
+    },
+    "state": {
+      "type": "string"
+    },
+    "neighborhood": {
+      "type": "string"
+    },
+    "reportingPhoneNumber": {
+      "type": "string"
+    },
+    "confirmationRequired": {
+      "type": "boolean"
+    }
+  }
 }
 EOF
+}
+
+resource "aws_api_gateway_request_validator" "dragon_post_request_validator" {
+  rest_api_id                 = aws_api_gateway_rest_api.dragon_api.id
+  name                        = "dragon_post_request_validator"
+  validate_request_body       = true
+  validate_request_parameters = false
+}
+
+resource "aws_api_gateway_deployment" "dev_deployment" {
+  rest_api_id = aws_api_gateway_rest_api.dragon_api.id
+  stage_name  = "dev_api"
+}
+
+output "dev_api_url" {
+  value = aws_api_gateway_deployment.dev_deployment.invoke_url
 }
