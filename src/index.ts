@@ -1,8 +1,8 @@
-import AWS from 'aws-sdk'
 import { APIGatewayEvent, ProxyResult } from 'aws-lambda'
+import S3 from 'aws-sdk/clients/s3'
 import { StreamingEventStream } from 'aws-sdk/lib/event-stream/event-stream'
 
-const s3 = new AWS.S3({
+const s3 = new S3({
     region: 'eu-central-1',
 })
 

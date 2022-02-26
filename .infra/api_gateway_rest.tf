@@ -1,3 +1,8 @@
+locals {
+  s3_bucket     = "dragon-ws-dev-serverlessdeploymentbucket-1cerqvdgbln5l"
+  s3_key        = "serverless/dragon-ws/dev/1645834972809-2022-02-26T00:22:52.809Z/dragon-ws.zip"
+  function_name = "dragon-ws-dev-dragon_ws"
+}
 resource "aws_api_gateway_rest_api" "dragon_api" {
   name = "dragon_api"
   endpoint_configuration {
@@ -18,80 +23,27 @@ resource "aws_api_gateway_method" "dragon_api_method_get" {
   rest_api_id   = aws_api_gateway_rest_api.dragon_api.id
 }
 
-resource "aws_api_gateway_integration" "dragon_api_integration" {
-  http_method = aws_api_gateway_method.dragon_api_method_get.http_method
-  resource_id = aws_api_gateway_resource.dragons_api_resource.id
-  rest_api_id = aws_api_gateway_rest_api.dragon_api.id
-  type        = "MOCK"
-  request_templates = {
-    "application/json" = jsonencode(
-      {
-        "statusCode" = 200
-      }
-    )
-  }
+resource "aws_lambda_alias" "dragon_api_alias" {
+  name             = "dragon_api_alias"
+  function_name    = local.function_name
+  function_version = "1"
 }
 
-resource "aws_api_gateway_integration_response" "dragon_integration_response_get" {
-  rest_api_id = aws_api_gateway_rest_api.dragon_api.id
-  resource_id = aws_api_gateway_resource.dragons_api_resource.id
-  http_method = aws_api_gateway_method.dragon_api_method_get.http_method
-  status_code = aws_api_gateway_method_response.dragon_response_get_200.status_code
+resource "aws_api_gateway_integration" "dragon_api_integration" {
+  http_method             = aws_api_gateway_method.dragon_api_method_get.http_method
+  integration_http_method = "GET"
+  resource_id             = aws_api_gateway_resource.dragons_api_resource.id
+  rest_api_id             = aws_api_gateway_rest_api.dragon_api.id
+  type                    = "AWS_PROXY"
+  uri                     = aws_lambda_alias.dragon_api_alias.invoke_arn
+}
 
-  response_templates = {
-    "application/json" = <<REQUEST_TEMPLATE
-      #if($input.params("family") == "green") 
-      {
-        "description_str":"Xanya is the fire tribe's banished general. She broke ranks and has been wandering ever since.",
-        "dragon_name_str":"Xanya",
-        "family_str":"red",
-        "location_city_str":"las vegas",
-        "location_country_str":"usa",
-        "location_neighborhood_str":"e clark ave",
-        "location_state_str":"nevada"
-      }
-      #elseif($input.params("family") == "blue") 
-      {
-        "description_str":"Shadown is the water tribe's main general. He commands the blue dragons.",
-        "dragon_name_str":"Shadown",
-        "family_str":"blue",
-        "location_city_str":"las vegas",
-        "location_country_str":"usa",
-        "location_neighborhood_str":"e clark ave",
-        "location_state_str":"nevada"
-      }
-      #elseif($input.params("family") == "black") 
-      {
-        "description_str":"Tawny is the earth tribe's main general. He commands the black dragons.",
-        "dragon_name_str":"Tawny",
-        "family_str":"black",
-        "location_city_str":"las vegas",
-        "location_country_str":"usa",
-        "location_neighborhood_str":"e clark ave",
-        "location_state_str":"nevada"
-      },
-      {
-        "description_str":"Eislex flies with the fire sprites. He protects them and is their guardian.",
-        "dragon_name_str":"Eislex",
-        "family_str":"red",
-        "location_city_str":"st. cloud",
-        "location_country_str":"usa",
-        "location_neighborhood_str":"breckenridge ave",
-        "location_state_str":"minnesota"
-      }
-      #else
-      {
-        "description_str":"",
-        "dragon_name_str":"",
-        "family_str":"",
-        "location_city_str":"",
-        "location_country_str":"",
-        "location_neighborhood_str":"",
-        "location_state_str":""
-      }
-      #end
-REQUEST_TEMPLATE
-  }
+### Lambda
+resource "aws_lambda_permission" "apigw_lambda" {
+  statement_id  = "AllowExecutionFromAPIGateway"
+  action        = "lambda:InvokeFunction"
+  function_name = local.function_name
+  principal     = "apigateway.amazonaws.com"
 }
 
 resource "aws_api_gateway_method_response" "dragon_response_get_200" {
@@ -201,6 +153,10 @@ resource "aws_api_gateway_request_validator" "dragon_post_request_validator" {
 }
 
 resource "aws_api_gateway_deployment" "dev_deployment" {
+  depends_on = [
+    aws_api_gateway_method.dragon_api_method_get,
+    aws_api_gateway_method.dragon_api_method_post
+  ]
   rest_api_id = aws_api_gateway_rest_api.dragon_api.id
   stage_name  = "dev_api"
 }

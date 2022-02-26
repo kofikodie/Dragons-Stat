@@ -6,6 +6,20 @@ provider:
   stage: dev
   region: eu-central-1
 
+plugins:
+  - serverless-offline
+  - serverless-webpack
+
 functions:
   dragon_ws:
     handler: dist/src/index.handler
+    events:
+      - http: 
+          path: /dragons
+          method: GET
+    
+custom:
+  webpack:
+    webpackConfig: 'webpack.config.js'
+    packager: 'npm'
+    excludeFiles: test/**
