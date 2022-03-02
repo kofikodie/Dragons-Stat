@@ -5,6 +5,20 @@ provider:
   runtime: nodejs14.x
   stage: dev
   region: eu-central-1
+  apiGateway:
+    restApiId: r${env.API_GATEWAY_ID}
+    restApiRootResourceId: ${env.API_GATEWAY_ROOT_ID}
+  iam:
+    role:
+
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - "s3:*"
+      Resource:
+        Fn::Join:
+          - ""
+          - "arn:aws:s3:::"
 
 plugins:
   - serverless-offline
@@ -13,10 +27,6 @@ plugins:
 functions:
   dragon_ws:
     handler: dist/src/index.handler
-    events:
-      - http: 
-          path: /dragons
-          method: GET
     
 custom:
   webpack:

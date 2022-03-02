@@ -1,8 +1,10 @@
 locals {
-  s3_bucket     = "dragon-ws-dev-serverlessdeploymentbucket-1cerqvdgbln5l"
-  s3_key        = "serverless/dragon-ws/dev/1645834972809-2022-02-26T00:22:52.809Z/dragon-ws.zip"
+  s3_bucket     = var.S3_BUCKET_NAME
+  s3_key        = var.S3_BUCKET_KEY
   function_name = "dragon-ws-dev-dragon_ws"
+  version       = "19"
 }
+
 resource "aws_api_gateway_rest_api" "dragon_api" {
   name = "dragon_api"
   endpoint_configuration {
@@ -23,10 +25,18 @@ resource "aws_api_gateway_method" "dragon_api_method_get" {
   rest_api_id   = aws_api_gateway_rest_api.dragon_api.id
 }
 
+module "cors" {
+  source  = "squidfunk/api-gateway-enable-cors/aws"
+  version = "0.3.3"
+
+  api_id          = aws_api_gateway_rest_api.dragon_api.id
+  api_resource_id = aws_api_gateway_rest_api.dragon_api.root_resource_id
+}
+
 resource "aws_lambda_alias" "dragon_api_alias" {
   name             = "dragon_api_alias"
   function_name    = local.function_name
-  function_version = "1"
+  function_version = local.version
 }
 
 resource "aws_api_gateway_integration" "dragon_api_integration" {
@@ -35,7 +45,7 @@ resource "aws_api_gateway_integration" "dragon_api_integration" {
   resource_id             = aws_api_gateway_resource.dragons_api_resource.id
   rest_api_id             = aws_api_gateway_rest_api.dragon_api.id
   type                    = "AWS_PROXY"
-  uri                     = aws_lambda_alias.dragon_api_alias.invoke_arn
+  uri                     = aws_lambda_alias.dragon_api_alias.invoke_arn #"arn:aws:apigateway:${var.AWS_DEFAULT_REGION}:lambda:path/2015-03-31/functions/arn:aws:lambda:${var.AWS_DEFAULT_REGION}:${var.AWS_ACCOUNT_ID}:function:${local.function_name}/invocations"
 }
 
 ### Lambda
@@ -44,6 +54,8 @@ resource "aws_lambda_permission" "apigw_lambda" {
   action        = "lambda:InvokeFunction"
   function_name = local.function_name
   principal     = "apigateway.amazonaws.com"
+
+  source_arn = "${aws_api_gateway_rest_api.dragon_api.execution_arn}/*/*"
 }
 
 resource "aws_api_gateway_method_response" "dragon_response_get_200" {
@@ -159,8 +171,4 @@ resource "aws_api_gateway_deployment" "dev_deployment" {
   ]
   rest_api_id = aws_api_gateway_rest_api.dragon_api.id
   stage_name  = "dev_api"
-}
-
-output "dev_api_url" {
-  value = aws_api_gateway_deployment.dev_deployment.invoke_url
 }
