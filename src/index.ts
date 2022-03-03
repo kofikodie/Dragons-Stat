@@ -12,9 +12,7 @@ exports.handler = async (event: APIGatewayEvent): Promise<ProxyResult> => {
 
 export async function readDragons(event: APIGatewayEvent): Promise<any> {
     const s3Bucket = await s3.listBuckets().promise()
-    const s3files = await s3
-        .listObjects({ Bucket: 'dragons-stat-bucket' })
-        .promise()
+    const s3files = await s3.listObjects({ Bucket: 'dragons-stat-bucket' }).promise()
 
     let bucketName: string = ''
     let fileName: string = ''
@@ -86,17 +84,14 @@ async function readDragonsFromS3(
         .promise()
 
     if (result) {
-        const eventStream =
-            result.Payload as StreamingEventStream<AWS.S3.SelectObjectContentEventStream>
+        const eventStream = result.Payload as StreamingEventStream<AWS.S3.SelectObjectContentEventStream>
         return await handleData(eventStream)
     }
 
     return false
 }
 
-async function handleData(
-    data: StreamingEventStream<AWS.S3.SelectObjectContentEventStream>
-): Promise<Error | string> {
+async function handleData(data: StreamingEventStream<AWS.S3.SelectObjectContentEventStream>): Promise<Error | string> {
     return new Promise((resolve, reject) => {
         let dataString = ''
         data.on('data', (event: any) => {

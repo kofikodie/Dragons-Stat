@@ -8,8 +8,8 @@ provider:
   apiGateway:
     restApiId: r${env.API_GATEWAY_ID}
     restApiRootResourceId: ${env.API_GATEWAY_ROOT_ID}
-  iam:
-    role:
+  #iam:
+    #role:
 
   iamRoleStatements:
     - Effect: "Allow"
@@ -22,7 +22,7 @@ provider:
 
 plugins:
   - serverless-offline
-  - serverless-webpack
+  - serverless-esbuild
 
 functions:
   dragon_ws:
