@@ -11,8 +11,10 @@ exports.handler = async (event: APIGatewayEvent): Promise<ProxyResult> => {
 }
 
 export async function readDragons(event: APIGatewayEvent): Promise<any> {
-    const s3Bucket = await s3.listBuckets().promise()
-    const s3files = await s3.listObjects({ Bucket: 'dragons-stat-bucket' }).promise()
+    const [s3Bucket, s3files] = await Promise.all([
+        s3.listBuckets().promise(),
+        s3.listObjects({ Bucket: 'dragons-stat-bucket' }).promise(),
+    ])
 
     let bucketName: string = ''
     let fileName: string = ''
@@ -28,7 +30,6 @@ export async function readDragons(event: APIGatewayEvent): Promise<any> {
             fileName = file.Key
         }
     })
-
     if (bucketName && fileName) {
         const dragonList = await readDragonsFromS3(bucketName, fileName, event)
         if (typeof dragonList === 'string') {

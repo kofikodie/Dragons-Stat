@@ -7,8 +7,8 @@
         "test": "jest  --config=jest.config.json ./tests",
         "test:watch": "jest --watchAll --config=jest.config.json ./tests",
         "build": "tsc --build",
-        "start:local": "npm run build && sls invoke local --stage dev --function dragon_ws --path ./dist/src/index.js",
-        "deploy": "npm run build && sls deploy",
+        "start:local": "yarn build && sls invoke local --stage dev --function dragon_ws --path ./dist/src/index.js",
+        "deploy": "yarn run build && sls deploy",
         "destroy": "sls remove"
     },
     "keywords": [],
